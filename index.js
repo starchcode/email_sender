@@ -1,21 +1,23 @@
 //packages
 require("dotenv").config();
 const axios = require("axios");
-const {google} = require('googleapis');
-const sheets = google.sheets('v4')
+const { google } = require("googleapis");
+const sheets = google.sheets("v4");
 
 //setup
-let data = ["a", "b", "c"];
+let data = [];
 let i = 0;
-const auth = new google.auth.GoogleAuth({ //google auth!
-    keyFile: './key.json',
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'], //read & write
-  });
+let interval;
+
+const auth = new google.auth.GoogleAuth({
+  //google auth!
+  keyFile: "./key.json",
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"], //read & write
+});
 // set auth as a global default
 google.options({
-    auth: auth
-  });
-
+  auth: auth,
+});
 
 //variables
 const GMAIL_USER = process.env.GMAIL_USER;
@@ -25,26 +27,43 @@ const SP_ID = process.env.SPREADSHEET_ID;
 const URL =
   "https://sheets.googleapis.com/v4/spreadsheets/spreadsheetId/values/Sheet1!A1:D5";
 
-
 //functions
 
 const get = async () => {
   try {
-    sheets.spreadsheets.values.get(
-        {
-          auth: auth,
-          spreadsheetId: SP_ID,
-          range: 'Sheet1!C6:E6',
-        },
-        (err, res) => {
-          if (err) {
-            console.error('The API returned an error.');
-            throw err;
-          }
-          const rows = res.data.values;
-          console.log(rows)
+    await sheets.spreadsheets.values.get(
+      {
+        auth: auth,
+        spreadsheetId: SP_ID,
+        //   range: 'Sheet1!C5:G',
+        range: "test!B6:G", // TEST
+      },
+      (err, res) => {
+        if (err) {
+          console.error("The API returned an error.");
+          throw err;
         }
-      )
+
+        data = res.data.values.filter((row) => {
+          // 1 index: email status
+          // 3 index: name
+          // 5 index: email address
+        return !row[1] && row[3] && row[5]
+
+        });
+        console.log(
+          "Data recieved, there are",
+          data.length,
+          "emails to be sent"
+        );
+
+        if (data.length) {
+          console.log("\nGoing to send emails.");
+
+          interval = setInterval(mailSender, 2000);
+        }
+      }
+    );
   } catch (e) {
     console.log(e.response);
   }
@@ -52,48 +71,45 @@ const get = async () => {
 
 //mail sender function
 mailSender = async () => {
+    // console.log(i, data.length)
   if (i < data.length) {
-    console.log(data[i]);
+    console.log("\nEmail ", i + 1, "out of", data.length);
+    console.log("Sending an email to:", data[i][5]);
+
+    update(Number(data[i][0]) + 5);
+
     i++;
   } else {
     console.log("Job is done\n");
-    clearInterval(starter);
+    clearInterval(interval);
   }
 };
 
-const update = async () => {
+const update = async (i) => {
   try {
+    console.log("Update email status in spreadsheet...");
+    const response = await sheets.spreadsheets.values.update({
+      spreadsheetId: SP_ID,
+      //   range: 'Sheet1!C6',
+      range: "test!C" + i,
+      valueInputOption: "USER_ENTERED",
 
-    const response = await sheets.spreadsheets.values.update(
-        {
-          spreadsheetId: SP_ID,
-          range: 'Sheet1!C6',
-          valueInputOption: 'USER_ENTERED',
-         
-          requestBody: {
-            values: [
-              ['Email Sent!']
-            ],
-          }
-        }
-      );
-        console.log(response.status);
-
+      requestBody: {
+        values: [["Email Sent!"]],
+      },
+    });
+    if (response.status === 200) console.log('cell', i-5, 'was updated');
   } catch (e) {
     console.log(e);
   }
-  console.log('end')
 };
-
-
 
 //run
 
-console.log("\nHi, \nApp is going to start...");
+console.log("\nHi, \nApp is going to start...\n");
 
 get();
 // update();
-
 
 // app();
 
