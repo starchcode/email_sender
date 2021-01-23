@@ -69,21 +69,6 @@ const get = async () => {
   }
 };
 
-//mail sender function
-mailSender = async () => {
-    // console.log(i, data.length)
-  if (i < data.length) {
-    console.log("\nEmail ", i + 1, "out of", data.length);
-    console.log("Sending an email to:", data[i][5]);
-
-    update(Number(data[i][0]) + 5);
-
-    i++;
-  } else {
-    console.log("Job is done\n");
-    clearInterval(interval);
-  }
-};
 
 const update = async (i) => {
   try {
@@ -103,6 +88,26 @@ const update = async (i) => {
     console.log(e);
   }
 };
+
+//mail sender function
+mailSender = async () => {
+    // console.log(i, data.length)
+  if (i < data.length) {
+    console.log("\nEmail ", i + 1, "out of", data.length);
+    console.log("Sending an email to:", data[i][5]);
+
+    update(Number(data[i][0]) + 5);
+
+    i++;
+  } else {
+    console.log("Job is done\n");
+    clearInterval(interval);
+  }
+};
+
+sendIt = async () => {
+    
+}
 
 //run
 
