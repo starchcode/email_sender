@@ -36,10 +36,13 @@ let transporter = nodemailer.createTransport({
 
 
 class emailSender {
-  constructor() {
+  constructor(sheet) {
     this._i = 0;
     this._data = [];
     this._interval;
+    this._sheet = sheet;
+    this._updateRange = 'C'
+    this._getRange = 'B6:G';
   }
 
   get i() {
@@ -50,6 +53,15 @@ class emailSender {
   }
   get interval() {
     return this._interval;
+  }
+  get sheet() {
+      return this._sheet;
+  }
+  get updateRange() {
+      return this._updateRange;
+  }
+  get getRange() {
+      return this._getRange;
   }
 
   set i(i) {
@@ -68,8 +80,7 @@ class emailSender {
         {
           auth: auth,
           spreadsheetId: SP_ID,
-          //   range: 'Sheet1!C5:G',
-          range: "test!B6:G",
+            range: this.sheet + this.getRange
         },
         (err, res) => {
           if (err) {
@@ -84,7 +95,7 @@ class emailSender {
           });
           if(res.status === 200){
           console.log(
-            "✅ Data recieved, there are",
+            "☑️  Data recieved, there are",
             this.data.length,
             "emails to be sent"
           );
@@ -105,8 +116,7 @@ class emailSender {
       console.log("Updating email status in spreadsheet...");
       const response = await sheets.spreadsheets.values.update({
         spreadsheetId: SP_ID,
-        //   range: 'Sheet1!C6',
-        range: "test!C" + i,
+        range: this.sheet + this.updateRange + i,
         valueInputOption: "USER_ENTERED",
 
         requestBody: {
@@ -147,7 +157,7 @@ class emailSender {
     if (this.i < this.data.length) {
 
       console.log("\nEmail ", this.i + 1, "out of", this.data.length);
-      console.log("Sending an email to:", this.data[this.i][3], this.data[this.i][5]);
+      console.log("Sending an email to:", this.data[this.i][3],' > ', this.data[this.i][5]);
 
       this.update(Number(this.data[this.i][0]) + 5);
 

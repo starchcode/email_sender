@@ -23,7 +23,16 @@ Enquiry: <br>" <em>${req.body.enquiry}</em>"
 
 console.log("\nHi, \nApp is going to start...\n");
 
-const myEmailSender = new emailSender();
+
+//sheet
+const SHEET= 'Sheet1!'
+const TEST_SHEET= 'test!'
+//Range    
+
+
+
+
+const myEmailSender = new emailSender(SHEET);
 
 const run = async () => {
     await myEmailSender.getData();
@@ -31,3 +40,4 @@ const run = async () => {
 }
 
 run();
+
