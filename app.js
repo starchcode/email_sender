@@ -3,25 +3,37 @@ require("dotenv").config();
 const axios = require("axios");
 const { google } = require("googleapis");
 const sheets = google.sheets("v4");
+const nodemailer = require('nodemailer');
 
-//setup
-const auth = new google.auth.GoogleAuth({
-  //google auth!
-  keyFile: "./key.json",
-  scopes: ["https://www.googleapis.com/auth/spreadsheets"], //read & write
-});
-// set auth as a global default
-google.options({
-  auth: auth,
-});
 
 //variables
 const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_PASS = process.env.GMAIL_PASS;
 const GOOGLE_API = process.env.GOOGLE_API;
 const SP_ID = process.env.SPREADSHEET_ID;
-// const URL =   //remove this...
-//   "https://sheets.googleapis.com/v4/spreadsheets/spreadsheetId/values/Sheet1!A1:D5";
+
+//setup
+const auth = new google.auth.GoogleAuth({
+    //google auth!
+    keyFile: "./key.json",
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"], //read & write
+  });
+  // set auth as a global default
+  google.options({
+    auth: auth,
+  });
+
+// create reusable transporter object using the default SMTP transport
+let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER, // generated ethereal user
+        pass: process.env.GMAIL_PASS, // generated ethereal password
+      },
+    });
+
+
+
 
 class emailSender {
   constructor() {
@@ -108,6 +120,28 @@ class emailSender {
   };
 
 
+  emailMachine = async () => {
+    // send mail with defined transport object
+    let info = await transporter.sendMail(
+        {
+          from: "<davoudraspberry@gmail.com>", // sender address
+          to: "starchcode@gmail.com", // list of receivers
+          subject: "Hello ✔", // Subject line
+        //   text: "Hi, Here is your code Mr.Dave!: ", // plain text body
+          html: "<b>Hello world?</b>", // html body
+        },
+        function (err, data) {
+          if (err) {
+            console.log("error: email did not send", err);
+            res.send("this could not be processed!");
+          } else {
+            res.send("Thank you! It's all done!");
+          }
+        }
+      );
+  }
+
+
   coreMethod = async () => {
     // console.log(i, data.length)
     if (this.i < this.data.length) {
@@ -124,6 +158,8 @@ class emailSender {
       clearInterval(this.interval);
     }
   };
+
+  
 }
 
 module.exports = emailSender;
