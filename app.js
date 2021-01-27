@@ -3,8 +3,7 @@ require("dotenv").config();
 const axios = require("axios");
 const { google } = require("googleapis");
 const sheets = google.sheets("v4");
-const nodemailer = require('nodemailer');
-
+const nodemailer = require("nodemailer");
 
 //variables
 const GMAIL_USER = process.env.GMAIL_USER;
@@ -14,35 +13,38 @@ const SP_ID = process.env.SPREADSHEET_ID;
 
 //setup
 const auth = new google.auth.GoogleAuth({
-    //google auth!
-    keyFile: "./key.json",
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"], //read & write
-  });
-  // set auth as a global default
-  google.options({
-    auth: auth,
-  });
+  //google auth!
+  keyFile: "./key.json",
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"], //read & write
+});
+// set auth as a global default
+google.options({
+  auth: auth,
+});
 
 // create reusable transporter object using the default SMTP transport
 let transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.GMAIL_USER, // generated ethereal user
-        pass: process.env.GMAIL_PASS, // generated ethereal password
-      },
-    });
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER, // generated ethereal user
+    pass: process.env.GMAIL_PASS, // generated ethereal password
+  },
+});
 
 
 
 
 class emailSender {
-  constructor(sheet) {
+  constructor(sheet, updateRange, getRange, emailTemp, fileName, pathToFile) {
     this._i = 0;
     this._data = [];
     this._interval;
     this._sheet = sheet;
-    this._updateRange = 'C'
-    this._getRange = 'B6:G';
+    this._updateRange = updateRange;
+    this._getRange = getRange;
+    this._emailTemp = emailTemp;
+    this._fileName = fileName;
+    this._pathToFile = pathToFile;
   }
 
   get i() {
@@ -55,13 +57,13 @@ class emailSender {
     return this._interval;
   }
   get sheet() {
-      return this._sheet;
+    return this._sheet;
   }
   get updateRange() {
-      return this._updateRange;
+    return this._updateRange;
   }
   get getRange() {
-      return this._getRange;
+    return this._getRange;
   }
 
   set i(i) {
@@ -80,7 +82,7 @@ class emailSender {
         {
           auth: auth,
           spreadsheetId: SP_ID,
-            range: this.sheet + this.getRange
+          range: this.sheet + this.getRange,
         },
         (err, res) => {
           if (err) {
@@ -91,18 +93,19 @@ class emailSender {
             // 1 index: email status
             // 3 index: name
             // 5 index: email address
-            return !row[1] && row[3] && row[5];
+            return !row[1] && row[3] && row[5] && row[6];
           });
-          if(res.status === 200){
-          console.log(
-            "☑️  Data recieved, there are",
-            this.data.length,
-            "emails to be sent"
-          );
+          if (res.status === 200) {
+            console.log(
+              "☑️  Data recieved, there are",
+              this.data.length,
+              "emails to be sent"
+            );
           }
 
           if (this.data.length) {
             console.log("\nGoing to send emails.");
+            // console.log(this.data[0])
           }
         }
       );
@@ -111,7 +114,7 @@ class emailSender {
     }
   };
 
-  update = async (i) => {
+  update = async (i, value) => {
     try {
       console.log("Updating email status in spreadsheet...");
       const response = await sheets.spreadsheets.values.update({
@@ -120,7 +123,7 @@ class emailSender {
         valueInputOption: "USER_ENTERED",
 
         requestBody: {
-          values: [["Email Sent!"]],
+          values: [[value]],
         },
       });
       if (response.status === 200) console.log("cell", i - 5, "was updated");
@@ -129,47 +132,66 @@ class emailSender {
     }
   };
 
-
-  emailMachine = async () => {
+  emailMachine = async (name, email, body, i) => {
     // send mail with defined transport object
+    console.log("Email Machine launched");
     let info = await transporter.sendMail(
-        {
-          from: "<davoudraspberry@gmail.com>", // sender address
-          to: "starchcode@gmail.com", // list of receivers
-          subject: "Hello ✔", // Subject line
+      {
+        from: "davoudraspberry@gmail.com", // sender address
+        to: email, // list of receivers
+        subject: "Inquiry - Davoud Razbari", // Subject line
         //   text: "Hi, Here is your code Mr.Dave!: ", // plain text body
-          html: "<b>Hello world?</b>", // html body
-        },
-        function (err, data) {
-          if (err) {
-            console.log("error: email did not send", err);
-            res.send("this could not be processed!");
-          } else {
-            res.send("Thank you! It's all done!");
-          }
-        }
-      );
-  }
+        html: body, // html body
+        attachments: [
+          {
+            filename: this._fileName,
+            path: this._pathToFile,
+            contentType: "application/pdf",
+          },
+        ],
+      },
+      function (err, data) {
+        if (err) {
+        this.update(Number(this.data[i][0]) + 5, 'Error!');
 
+          console.log(
+            "error: email did not send to",
+            name,
+            ":",
+            email,
+            "\ndetails:",
+            err
+          );
+        } else {
+          console.log("Email sent to", name, ":", email);
+            this.update(Number(this.data[i][0]) + 5, 'Email Sent!');
+        }
+      }
+    );
+  };
 
   coreMethod = async () => {
     // console.log(i, data.length)
+
+    const pullData = (j) => this.data[this.i][j];
+    const name = pullData(3);
+    const email = pullData(5);
+    const sentence = pullData(6);
     if (this.i < this.data.length) {
-
       console.log("\nEmail ", this.i + 1, "out of", this.data.length);
-      console.log("Sending an email to:", this.data[this.i][3],' > ', this.data[this.i][5]);
+      console.log("Sending an email to:", name, " > ", email);
 
-      this.update(Number(this.data[this.i][0]) + 5);
+        // console.log(this._emailTemp(name, sentence))
+    //   this.emailMachine(name, email, this._emailTemp(name, sentence), this.i);
+
+        this.update(Number(this.data[this.i][0]) + 5, 'Email Sent!');
 
       this.i++;
-
     } else {
       console.log("\nJob is done! 👍🏼\n");
       clearInterval(this.interval);
     }
   };
-
-  
 }
 
 module.exports = emailSender;
