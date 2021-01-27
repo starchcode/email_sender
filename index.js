@@ -59,12 +59,9 @@ const pathToFile = "./attatchments/Davoud Razbari - CV - 2021-01-26.pdf";
 
 const myEmailSender = new emailSender(TEST_SHEET, UPDATE_RANGE, GET_RANGE, emailTemp, fileName, pathToFile);
 
-const run = async () => {
-    await myEmailSender.getData();
-    myEmailSender.interval = setInterval(myEmailSender.coreMethod, 2000);
-}
 
-run()
+
+myEmailSender.run();
 
 // myEmailSender.emailMachine('Davoud', 'mrdave67@gmail.com', emailTemp('Davoud', 'Especially because of this article Hitesh https://www.webconsulting.ie/top-5-web-designs-to-keep-in-mind-for-2021'))
 

@@ -8,7 +8,7 @@ key.json
 /attatchments
 # testing
 /coverage
-
+/log/log*.txt
 # production
 /build
 
