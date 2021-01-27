@@ -4,6 +4,7 @@ const axios = require("axios");
 const { google } = require("googleapis");
 const sheets = google.sheets("v4");
 const nodemailer = require("nodemailer");
+const fs = require('fs');
 
 //variables
 const GMAIL_USER = process.env.GMAIL_USER;
