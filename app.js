@@ -10,7 +10,6 @@ const fs = require("fs");
 const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_PASS = process.env.GMAIL_PASS;
 const GOOGLE_API = process.env.GOOGLE_API;
-const SP_ID = process.env.SPREADSHEET_ID;
 
 //DATE
 let date = new Date();
@@ -50,11 +49,12 @@ let transporter = nodemailer.createTransport({
 });
 
 class emailSender {
-  constructor(sheet, updateRange, getRange, emailTemp, fileName, pathToFile) {
+  constructor(sheet, spId,updateRange, getRange, emailTemp, fileName, pathToFile) {
     this._i = 0;
     this._data = [];
     this._interval;
     this._sheet = sheet;
+    this._spId = spId;
     this._updateRange = updateRange;
     this._getRange = getRange;
     this._emailTemp = emailTemp;
@@ -73,6 +73,9 @@ class emailSender {
   }
   get sheet() {
     return this._sheet;
+  }
+  get spId () {
+      return this._spId;
   }
   get updateRange() {
     return this._updateRange;
@@ -96,7 +99,7 @@ class emailSender {
       await sheets.spreadsheets.values.get(
         {
           auth: auth,
-          spreadsheetId: SP_ID,
+          spreadsheetId: this.spId,
           range: this.sheet + this.getRange,
         },
         (err, res) => {
@@ -134,7 +137,7 @@ class emailSender {
         logger(DATE,`Updating email status in spreadsheet...
         `)
       const response = await sheets.spreadsheets.values.update({
-        spreadsheetId: SP_ID,
+        spreadsheetId: this.spId,
         range: this.sheet + this.updateRange + i,
         valueInputOption: "USER_ENTERED",
 

@@ -3,7 +3,6 @@ const emailSender = require('./app');
 
 
 //function to be passed as template
-
 function emailTemp (name, sentence) {
     return (    
 `Dear sir/madam,<br><br>
@@ -39,14 +38,8 @@ website: https://starchCode.com<br>
     )
 }
 
-
-
-//run
-
-console.log("\nHi, \nApp is going to start...\n");
-
-
 //sheet
+const SP_ID='1LIZo3hScxCotSqf7KKrufdzROQi0_2bMflC87JQbcAw'
 const SHEET= 'Sheet1!'
 const TEST_SHEET= 'test!'
 //Range    
@@ -56,12 +49,11 @@ const GET_RANGE = 'B6:H';
 const fileName = "Davoud Razbari - CV - 2021-01-26.pdf";
 const pathToFile = "./attatchments/Davoud Razbari - CV - 2021-01-26.pdf";
 
-
-const myEmailSender = new emailSender(TEST_SHEET, UPDATE_RANGE, GET_RANGE, emailTemp, fileName, pathToFile);
-
+const myEmailSender = new emailSender(SHEET, SP_ID, UPDATE_RANGE, GET_RANGE, emailTemp, fileName, pathToFile);
 
 
-myEmailSender.run();
 
-// myEmailSender.emailMachine('Davoud', 'mrdave67@gmail.com', emailTemp('Davoud', 'Especially because of this article Hitesh https://www.webconsulting.ie/top-5-web-designs-to-keep-in-mind-for-2021'))
+console.log("\nHi, \nApp is going to start...\n");
+
+myEmailSender.run(); // run the app
 
