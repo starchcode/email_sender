@@ -31,9 +31,6 @@ let transporter = nodemailer.createTransport({
   },
 });
 
-
-
-
 class emailSender {
   constructor(sheet, updateRange, getRange, emailTemp, fileName, pathToFile) {
     this._i = 0;
@@ -134,7 +131,9 @@ class emailSender {
 
   emailMachine = async (name, email, body, i) => {
     // send mail with defined transport object
+    const updateIndex = Number(this.data[i][0]) + 5;
     console.log("Email Machine launched");
+
     let info = await transporter.sendMail(
       {
         from: "davoudraspberry@gmail.com", // sender address
@@ -150,21 +149,21 @@ class emailSender {
           },
         ],
       },
-      function (err, data) {
-        if (err) {
-        this.update(Number(this.data[i][0]) + 5, 'Error!');
+      (err) => {
 
-          console.log(
-            "error: email did not send to",
-            name,
-            ":",
-            email,
-            "\ndetails:",
-            err
-          );
+        if (err) {
+        this.update(updateIndex, "Error!");
+        //   console.log(
+        //     "error: email did not send to",
+        //     name,
+        //     ":",
+        //     email,
+        //     "\ndetails:",
+        //     err
+        //   );
         } else {
-          console.log("Email sent to", name, ":", email);
-            this.update(Number(this.data[i][0]) + 5, 'Email Sent!');
+            this.update(updateIndex, "Email Sent!");
+        //   console.log("Email sent to", name, ":", email);
         }
       }
     );
@@ -172,19 +171,19 @@ class emailSender {
 
   coreMethod = async () => {
     // console.log(i, data.length)
-
     const pullData = (j) => this.data[this.i][j];
-    const name = pullData(3);
-    const email = pullData(5);
-    const sentence = pullData(6);
+
     if (this.i < this.data.length) {
+      const name = pullData(3);
+      const email = pullData(5);
+      const sentence = pullData(6);
       console.log("\nEmail ", this.i + 1, "out of", this.data.length);
       console.log("Sending an email to:", name, " > ", email);
 
-        // console.log(this._emailTemp(name, sentence))
-    //   this.emailMachine(name, email, this._emailTemp(name, sentence), this.i);
+      // console.log(this._emailTemp(name, sentence))
+      this.emailMachine(name, email, this._emailTemp(name, sentence), this.i);
 
-        this.update(Number(this.data[this.i][0]) + 5, 'Email Sent!');
+      // this.update(Number(this.data[this.i][0]) + 5, 'Email Sent!');
 
       this.i++;
     } else {

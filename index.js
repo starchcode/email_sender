@@ -10,9 +10,9 @@ function emailTemp (name, sentence) {
 
 I am a self-taught web developer with 1 year of experience working with HTML, CSS and JavaScript (ReactJs and NodeJs). Currently seeking a junior position.<br><br>
 
-I am hoping to learn about web development from some of the best in the industry, and in my research, I came across ${name}. ${sentence}.<br><br> 
+I am hoping to learn about web development from some of the best in the industry, and in my research, I came across <b>${name}</b>. ${sentence}.<br><br> 
 
-I am more than happy <b>to volunteer working with you</b> even <em>if you do not offer any vacancies at the moment but need some extra help with any projects</em>. As I am still a junior in the industry, my main goal is to get hands on experience and improve my skills.<br>
+I am more than happy <b>to volunteer working with you</b> <em>if you do not offer any vacancies at the moment but need some extra help with any projects</em>. As I am still a junior in the industry, my main goal is to get hands on experience and improve my skills.<br>
 I would be grateful if you could have a look at my CV (please see attached).<br><br>
 
 Here is my recent React and NodeJs project that I have done entirely from scratch including wire-framing and design:<br><br>
